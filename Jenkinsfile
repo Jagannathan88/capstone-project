@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Adjust to your credential ID
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Ensure this matches your credential ID
         REPO_URL = 'https://github.com/Jagannathan88/capstone-project.git'
         DEV_BRANCH = 'dev'
         MASTER_BRANCH = 'master'
