@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Ensure this matches your credential ID
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
         REPO_URL = 'https://github.com/Jagannathan88/capstone-project.git'
         DEV_BRANCH = 'dev'
         MASTER_BRANCH = 'master'
@@ -24,6 +24,7 @@ pipeline {
                 branch "${DEV_BRANCH}"
             }
             steps {
+                echo "Building and pushing Docker image to development repository"
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
                         def dockerImage = docker.build("${DEV_DOCKER_IMAGE}")
@@ -38,6 +39,7 @@ pipeline {
                 branch "${DEV_BRANCH}"
             }
             steps {
+                echo "Deploying container from development image"
                 script {
                     // Stop and remove the container if it exists
                     sh "docker ps -aqf name=${CONTAINER_NAME} | xargs -r docker stop || true"
@@ -54,6 +56,7 @@ pipeline {
                 branch "${MASTER_BRANCH}"
             }
             steps {
+                echo "Pushing Docker image to production repository"
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
                         def dockerImage = docker.build("${PROD_DOCKER_IMAGE}")
