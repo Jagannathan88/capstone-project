@@ -4,8 +4,8 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Adjust to your credential ID
         REPO_URL = 'https://github.com/Jagannathan88/capstone-project.git'
-        DEV_BRANCH = 'refs/heads/dev'
-        MASTER_BRANCH = 'refs/heads/master'
+        DEV_BRANCH = 'dev'
+        MASTER_BRANCH = 'master'
         DEV_DOCKER_IMAGE = 'jagannathan88/dev:latest'
         PROD_DOCKER_IMAGE = 'jagannathan88/prod:latest'
         CONTAINER_NAME = 'my-app-container'
@@ -15,13 +15,13 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                git branch: "${env.BRANCH}", url: "${env.REPO_URL}"
+                checkout([$class: 'GitSCM', branches: [[name: "${DEV_BRANCH}"]], userRemoteConfigs: [[url: "${REPO_URL}"]]])
             }
         }
 
         stage('Build and Push Docker Image') {
             when {
-                branch 'dev'
+                branch "${DEV_BRANCH}"
             }
             steps {
                 script {
@@ -35,7 +35,7 @@ pipeline {
 
         stage('Deploy Container') {
             when {
-                branch 'dev'
+                branch "${DEV_BRANCH}"
             }
             steps {
                 script {
@@ -51,7 +51,7 @@ pipeline {
 
         stage('Push to Prod Repository') {
             when {
-                branch 'master'
+                branch "${MASTER_BRANCH}"
             }
             steps {
                 script {
