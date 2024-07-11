@@ -17,7 +17,7 @@ pipeline {
                           extensions: [[$class: 'CleanBeforeCheckout']],
                           submoduleCfg: [],
                           userRemoteConfigs: [[credentialsId: 'github-credentials',
-                                               url: 'https://github.com/Jagannathan88/testweb.git']]])
+                                               url: 'https://github.com/Jagannathan88/capstone-project.git']]])
             }
         }
 
