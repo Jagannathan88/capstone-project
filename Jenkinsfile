@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials'
         REPO_URL = 'https://github.com/Jagannathan88/capstone-project.git'
-        BRANCH = 'dev'
+        BRANCH = 'refs/heads/dev'
         DOCKER_IMAGE = 'jagannathan88/dev:latest'
         CONTAINER_NAME = 'my-app-container'
     }
