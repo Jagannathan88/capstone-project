@@ -13,7 +13,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                git branch: "${env.BRANCH}", url: "${env.REPO_URL}"
+                checkout([$class: 'GitSCM', branches: [[name: "${env.BRANCH}"]],
+                          doGenerateSubmoduleConfigurations: false, extensions: [], 
+                          submoduleCfg: [], userRemoteConfigs: [[url: "${env.REPO_URL}"]]])
             }
         }
 
