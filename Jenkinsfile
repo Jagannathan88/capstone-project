@@ -4,8 +4,8 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials'
         REPO_URL = 'https://github.com/Jagannathan88/capstone-project.git'
-        BRANCH = 'dev'  // Simplified branch name
-        DOCKER_IMAGE = 'jagannathan88/dev:latest'
+        DEV_DOCKER_IMAGE = 'jagannathan88/dev:latest'
+        PROD_DOCKER_IMAGE = 'jagannathan88/prod:latest'
         CONTAINER_NAME = 'my-app-container'
     }
 
@@ -13,16 +13,31 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                git branch: "${env.BRANCH}", url: "${env.REPO_URL}"
+                script {
+                    def branch = env.GIT_BRANCH ?: 'dev' // default to 'dev' if GIT_BRANCH is not set
+                    echo "Branch: ${branch}"
+                    git branch: "${branch}", url: "${env.REPO_URL}"
+                }
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_HUB_CREDENTIALS}") {
-                        def dockerImage = docker.build("${env.DOCKER_IMAGE}")
-                        dockerImage.push()
+                    if (env.GIT_BRANCH == 'dev') {
+                        // Build and push to dev repository
+                        docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_HUB_CREDENTIALS}") {
+                            def image = docker.build(env.DEV_DOCKER_IMAGE)
+                            image.push()
+                        }
+                    } else if (env.GIT_BRANCH == 'master') {
+                        // Build and push to prod repository
+                        docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_HUB_CREDENTIALS}") {
+                            def image = docker.build(env.PROD_DOCKER_IMAGE)
+                            image.push()
+                        }
+                    } else {
+                        error "Unknown branch: ${env.GIT_BRANCH}"
                     }
                 }
             }
@@ -36,7 +51,13 @@ pipeline {
                     sh "docker ps -aqf name=${env.CONTAINER_NAME} | xargs -r docker rm || true"
 
                     // Run the new container
-                    sh "docker run -d -p 80:80 --name ${env.CONTAINER_NAME} ${env.DOCKER_IMAGE}"
+                    def dockerImage = ''
+                    if (env.GIT_BRANCH == 'dev') {
+                        dockerImage = env.DEV_DOCKER_IMAGE
+                    } else if (env.GIT_BRANCH == 'master') {
+                        dockerImage = env.PROD_DOCKER_IMAGE
+                    }
+                    sh "docker run -d -p 80:80 --name ${env.CONTAINER_NAME} ${dockerImage}"
                 }
             }
         }
