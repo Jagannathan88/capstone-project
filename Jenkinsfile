@@ -23,47 +23,44 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
-            when {
-                branch "${DEV_BRANCH}"
-            }
             steps {
-                echo "Building and pushing Docker image to development repository"
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
-                        def dockerImage = docker.build("${DEV_DOCKER_IMAGE}")
-                        dockerImage.push()
+                    if (env.GIT_BRANCH == "origin/${DEV_BRANCH}") {
+                        echo "Building and pushing Docker image to development repository"
+                        docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                            def dockerImage = docker.build("${DEV_DOCKER_IMAGE}")
+                            dockerImage.push()
+                        }
                     }
                 }
             }
         }
 
         stage('Deploy Container') {
-            when {
-                branch "${DEV_BRANCH}"
-            }
             steps {
-                echo "Deploying container from development image"
                 script {
-                    // Stop and remove the container if it exists
-                    sh "docker ps -aqf name=${CONTAINER_NAME} | xargs -r docker stop || true"
-                    sh "docker ps -aqf name=${CONTAINER_NAME} | xargs -r docker rm || true"
+                    if (env.GIT_BRANCH == "origin/${DEV_BRANCH}") {
+                        echo "Deploying container from development image"
+                        // Stop and remove the container if it exists
+                        sh "docker ps -aqf name=${CONTAINER_NAME} | xargs -r docker stop || true"
+                        sh "docker ps -aqf name=${CONTAINER_NAME} | xargs -r docker rm || true"
 
-                    // Run the new container
-                    sh "docker run -d -p 80:80 --name ${CONTAINER_NAME} ${DEV_DOCKER_IMAGE}"
+                        // Run the new container
+                        sh "docker run -d -p 80:80 --name ${CONTAINER_NAME} ${DEV_DOCKER_IMAGE}"
+                    }
                 }
             }
         }
 
         stage('Push to Prod Repository') {
-            when {
-                branch "${MASTER_BRANCH}"
-            }
             steps {
-                echo "Pushing Docker image to production repository"
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
-                        def dockerImage = docker.build("${PROD_DOCKER_IMAGE}")
-                        dockerImage.push()
+                    if (env.GIT_BRANCH == "origin/${MASTER_BRANCH}") {
+                        echo "Pushing Docker image to production repository"
+                        docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                            def dockerImage = docker.build("${PROD_DOCKER_IMAGE}")
+                            dockerImage.push()
+                        }
                     }
                 }
             }
