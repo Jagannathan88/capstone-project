@@ -15,7 +15,10 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                checkout([$class: 'GitSCM', branches: [[name: "*/${DEV_BRANCH}"]], userRemoteConfigs: [[url: "${REPO_URL}"]]])
+                script {
+                    sh "git clone ${REPO_URL}"
+                    sh "cd capstone-project && git checkout ${DEV_BRANCH}"
+                }
             }
         }
 
