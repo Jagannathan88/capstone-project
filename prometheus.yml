@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s  # Set the scrape interval to 15 seconds
+
+scrape_configs:
+  - job_name: 'capstone-app'
+    static_configs:
+      - targets: ['192.168.1.80:9113']
