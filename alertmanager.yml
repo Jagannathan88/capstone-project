@@ -1,0 +1,17 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'jagannathan88@gmail.com'
+  smtp_auth_username: 'jagannathan88@gmail.com'
+  smtp_auth_password: 'dncg udwz ltar tyiq'
+  smtp_require_tls: true
+
+route:
+  receiver: 'email-notifications'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+- name: 'email-notifications'
+  email_configs:
+  - to: 'jagannathan88@gmail.com'

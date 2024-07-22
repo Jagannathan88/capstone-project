@@ -1,0 +1,10 @@
+groups:
+- name: Capstone_app_is_down_alert
+  rules:
+  - alert: Capstone_app_is_down_alert
+    expr: nginx_up == 0
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      summary: Capstone_Container_is_down
